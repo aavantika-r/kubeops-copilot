@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniShop</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f6f8;
+            color: #222;
+        }
+
+        header {
+            background: #111827;
+            color: white;
+            padding: 20px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .cart {
+            background: white;
+            color: #111827;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 45px 20px 25px;
+        }
+
+        .hero h2 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            color: #666;
+        }
+
+        .products {
+            max-width: 1100px;
+            margin: 20px auto 60px;
+            padding: 0 20px;
+
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+        }
+
+        .product {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+
+        .product:hover {
+            transform: translateY(-5px);
+        }
+
+        .product img {
+            width: 100%;
+            height: 190px;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 18px;
+        }
+
+        .product-info h3 {
+            margin: 0 0 8px;
+            font-size: 20px;
+        }
+
+        .price {
+            font-size: 19px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        button {
+            width: 100%;
+            border: none;
+            padding: 11px;
+            border-radius: 7px;
+            background: #2563eb;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #111827;
+            color: #aaa;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🛒 MiniShop</h1>
+    <a href="/cart" class="cart">🛒 View Cart</a>
+</header>
+
+<section class="hero">
+    <h2>Welcome to MiniShop</h2>
+    <p>A simple e-commerce application running on Kubernetes</p>
+</section>
+
+<section class="products">
+
+    <div class="product">
+        <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600"
+             alt="Laptop">
+
+        <div class="product-info">
+            <h3>Laptop</h3>
+            <div class="price">₹50,000</div>
+            <button onclick="addToCart(1)">Add to Cart</button>
+        </div>
+    </div>
+
+
+    <div class="product">
+        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600"
+             alt="Headphones">
+
+        <div class="product-info">
+            <h3>Headphones</h3>
+            <div class="price">₹2,000</div>
+            <button onclick="addToCart(2)">Add to Cart</button>
+        </div>
+    </div>
+
+
+    <div class="product">
+        <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600"
+             alt="Keyboard">
+
+        <div class="product-info">
+            <h3>Keyboard</h3>
+            <div class="price">₹1,500</div>
+            <button onclick="addToCart(3)">Add to Cart</button>
+        </div>
+    </div>
+
+
+    <div class="product">
+        <img src="https://images.unsplash.com/photo-1527814050087-3793815479db?w=600"
+             alt="Mouse">
+
+        <div class="product-info">
+            <h3>Mouse</h3>
+            <div class="price">₹800</div>
+            <button onclick="addToCart(4)">Add to Cart</button>
+        </div>
+    </div>
+
+</section>
+
+<footer>
+    MiniShop • Kubernetes Test Application
+</footer>
+<script>
+async function addToCart(productId) {
+    const response = await fetch("/cart", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            product_id: productId
+        })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+        alert(data.product.name + " added to cart!");
+    } else {
+        alert(data.error);
+    }
+}
+</script>
+</body>
+</html>

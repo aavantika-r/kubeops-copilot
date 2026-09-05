@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: minishop
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: minishop
+
+  template:
+    metadata:
+      labels:
+        app: minishop
+
+    spec:
+      containers:
+        - name: minishop
+          image: minishop:v999
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 5000
+
+          envFrom:
+            - secretRef:
+                name: minishop-db
