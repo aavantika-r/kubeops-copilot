@@ -1,126 +1,116 @@
-from flask import Flask, render_template, request, jsonify
-from dotenv import load_dotenv
-from pod_analyzer.pod_analyzer import router as pod_router
-import os
-import psycopg2
-
-load_dotenv()
+from flask import Flask, render_template, Response, request, redirect
+import requests
 
 app = Flask(__name__)
-app.register_blueprint(pod_router)
 
-# Database connection
-def get_db_connection():
-    return psycopg2.connect(
-        host=os.getenv("DB_HOST"),
-        database=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        port=os.getenv("DB_PORT"),
-                sslmode="require"
-    )
+LOGIN_URL = "http://login:5001"
+PAYMENT_URL = "http://payment:5004"
 
 
-# Home page
 @app.route("/")
-def home():
-    return render_template("index.html")
+def root():
+    response = requests.get(f"{LOGIN_URL}/login")
+    return Response(response.text, mimetype="text/html")
 
 
-# Add product to cart
-@app.route("/cart", methods=["POST"])
-def add_to_cart():
+@app.route("/login", methods=["GET"])
+def login_page():
+    response = requests.get(f"{LOGIN_URL}/login")
+    return Response(response.text, mimetype="text/html")
 
-    data = request.get_json()
-    product_id = data.get("product_id")
 
-    conn = get_db_connection()
-    cur = conn.cursor()
+@app.route("/login", methods=["POST"])
+def login_submit():
+    response = requests.post(f"{LOGIN_URL}/login", data=request.form)
 
-    cur.execute(
-        """
-        INSERT INTO cart_items (product_id, quantity)
-        VALUES (%s, %s)
-        """,
-        (product_id, 1)
+    if response.status_code == 200:
+        return redirect("/shop")
+
+    return Response(
+        response.content,
+        status=response.status_code,
+        mimetype="text/html"
     )
 
-    conn.commit()
 
-    # Get product name
-    cur.execute(
-        "SELECT name FROM products WHERE id = %s",
-        (product_id,)
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "GET":
+        response = requests.get(f"{LOGIN_URL}/register")
+    else:
+        response = requests.post(f"{LOGIN_URL}/register", data=request.form)
+
+    return Response(
+        response.content,
+        status=response.status_code,
+        content_type=response.headers.get("Content-Type", "text/html")
     )
 
-    product = cur.fetchone()
 
-    cur.close()
-    conn.close()
-
-    return jsonify({
-        "message": "Product added to cart",
-        "product": {
-            "name": product[0]
-        }
-    })
+@app.route("/shop")
+def shop():
+    response = requests.get("http://product:5002/api/products")
+    products = response.json()
+    return render_template("index.html", products=products)
 
 
-# View cart
+@app.route("/images/<filename>")
+def images(filename):
+    response = requests.get(f"http://product:5002/static/images/{filename}")
+
+    return Response(
+        response.content,
+        mimetype=response.headers.get("Content-Type", "image/png")
+    )
+
+
 @app.route("/cart", methods=["GET"])
 def view_cart():
+    response = requests.get("http://cart:5003/cart")
+    return Response(response.text, mimetype="text/html")
 
-    conn = get_db_connection()
-    cur = conn.cursor()
 
-    cur.execute(
-        """
-        SELECT
-            c.id,
-            p.name,
-            p.price,
-            c.quantity,
-            (p.price * c.quantity) AS subtotal
-        FROM cart_items c
-        JOIN products p
-        ON c.product_id = p.id
-        """
+@app.route("/cart", methods=["POST"])
+def add_to_cart():
+    response = requests.post("http://cart:5003/cart", json=request.get_json())
+
+    return Response(
+        response.content,
+        status=response.status_code,
+        mimetype="application/json"
     )
 
-    cart_items = cur.fetchall()
 
-    total = sum(item[4] for item in cart_items)
-
-    cur.close()
-    conn.close()
-
-    return render_template(
-        "cart.html",
-        cart_items=cart_items,
-        total=total
-    )
 @app.route("/cart/delete/<int:item_id>", methods=["POST"])
-def delete_cart_item(item_id):
-    conn = get_db_connection()
-    cur = conn.cursor()
+def delete_item(item_id):
+    response = requests.post(f"http://cart:5003/cart/delete/{item_id}")
 
-    cur.execute(
-        "DELETE FROM cart_items WHERE id = %s",
-        (item_id,)
+    return Response(
+        response.content,
+        status=response.status_code,
+        mimetype="application/json"
     )
 
-    conn.commit()
 
-    cur.close()
-    conn.close()
+@app.route("/payment")
+def payment_page():
+    response = requests.get(f"{PAYMENT_URL}/payment")
+    return Response(
+        response.content,
+        status=response.status_code,
+        mimetype="text/html"
+    )
 
-    return jsonify({"message": "Item removed from cart"})
 
-# Run application
+@app.route("/pay")
+def pay():
+    response = requests.get(f"{PAYMENT_URL}/pay")
+    return Response(
+        response.content,
+        status=response.status_code,
+        mimetype="text/html"
+    )
+
+
 if __name__ == "__main__":
-
-    app.run(
-        host="0.0.0.0",
-        port=5000,
-        debug=True
-    )
+    app.run(host="0.0.0.0", port=5000, debug=True)

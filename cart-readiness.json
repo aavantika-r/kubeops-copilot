@@ -1,0 +1,21 @@
+{
+  "spec": {
+    "template": {
+      "spec": {
+        "containers": [
+          {
+            "name": "cart",
+            "readinessProbe": {
+              "httpGet": {
+                "path": "/this-path-does-not-exist",
+                "port": 5003
+              },
+              "initialDelaySeconds": 2,
+              "periodSeconds": 5
+            }
+          }
+        ]
+      }
+    }
+  }
+}

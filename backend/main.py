@@ -28,6 +28,8 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
         "http://localhost:5174",
         "http://127.0.0.1:5174"
     ],
@@ -59,6 +61,211 @@ def health():
     return {
         "status": "healthy"
     }
+
+
+# ==================================================
+# LIVE CLUSTER INFORMATION
+# ==================================================
+
+@app.get("/cluster-info")
+def cluster_info():
+
+    from kubernetes import client, config
+
+    try:
+
+        # --------------------------------------------------
+        # GET CURRENT KUBERNETES CONTEXT
+        # --------------------------------------------------
+
+        contexts, active_context = (
+            config.list_kube_config_contexts()
+        )
+
+        current_context = (
+            active_context["name"]
+            if active_context
+            else "Unknown"
+        )
+
+        # --------------------------------------------------
+        # LOAD KUBERNETES CONFIG
+        # --------------------------------------------------
+
+        config.load_kube_config()
+
+        v1 = client.CoreV1Api()
+
+        # --------------------------------------------------
+        # KUBERNETES VERSION
+        # --------------------------------------------------
+
+        version_api = client.VersionApi()
+
+        version_info = (
+            version_api.get_code()
+        )
+
+        kubernetes_version = (
+            version_info.git_version
+        )
+
+        # --------------------------------------------------
+        # NODES
+        # --------------------------------------------------
+
+        nodes = v1.list_node().items
+
+        ready_nodes = 0
+
+        node_details = []
+
+        for node in nodes:
+
+            ready = False
+
+            for condition in (
+                node.status.conditions or []
+            ):
+
+                if (
+                    condition.type == "Ready"
+                    and condition.status == "True"
+                ):
+
+                    ready = True
+                    break
+
+            if ready:
+                ready_nodes += 1
+
+            node_details.append({
+                "name": node.metadata.name,
+                "ready": ready
+            })
+
+        # --------------------------------------------------
+        # ALL PODS
+        # --------------------------------------------------
+
+        pods = (
+            v1.list_pod_for_all_namespaces()
+            .items
+        )
+
+        pod_stats = {
+            "total": len(pods),
+            "running": 0,
+            "pending": 0,
+            "failed": 0,
+            "succeeded": 0
+        }
+
+        for pod in pods:
+
+            phase = (
+                pod.status.phase
+                or "Unknown"
+            )
+
+            if phase == "Running":
+
+                pod_stats["running"] += 1
+
+            elif phase == "Pending":
+
+                pod_stats["pending"] += 1
+
+            elif phase == "Failed":
+
+                pod_stats["failed"] += 1
+
+            elif phase == "Succeeded":
+
+                pod_stats["succeeded"] += 1
+
+        # --------------------------------------------------
+        # NAMESPACES
+        # --------------------------------------------------
+
+        namespaces = (
+            v1.list_namespace().items
+        )
+
+        namespace_list = [
+            namespace.metadata.name
+            for namespace in namespaces
+        ]
+
+        # --------------------------------------------------
+        # RETURN LIVE DATA
+        # --------------------------------------------------
+
+        return {
+
+            "connected": True,
+
+            "context": current_context,
+
+            "kubernetes_version":
+                kubernetes_version,
+
+            "nodes": {
+
+                "total":
+                    len(nodes),
+
+                "ready":
+                    ready_nodes,
+
+                "details":
+                    node_details
+            },
+
+            "pods":
+                pod_stats,
+
+            "namespaces":
+                namespace_list
+        }
+
+    except Exception as error:
+
+        return {
+
+            "connected": False,
+
+            "context": None,
+
+            "kubernetes_version": None,
+
+            "nodes": {
+
+                "total": 0,
+
+                "ready": 0,
+
+                "details": []
+            },
+
+            "pods": {
+
+                "total": 0,
+
+                "running": 0,
+
+                "pending": 0,
+
+                "failed": 0,
+
+                "succeeded": 0
+            },
+
+            "namespaces": [],
+
+            "error":
+                str(error)
+        }
 
 
 # ==================================================

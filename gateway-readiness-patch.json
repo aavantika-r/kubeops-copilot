@@ -1,0 +1,21 @@
+{
+  "spec": {
+    "template": {
+      "spec": {
+        "containers": [
+          {
+            "name": "gateway",
+            "readinessProbe": {
+              "httpGet": {
+                "path": "/wrong-health",
+                "port": 5000
+              },
+              "initialDelaySeconds": 2,
+              "periodSeconds": 5
+            }
+          }
+        ]
+      }
+    }
+  }
+}

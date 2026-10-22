@@ -1,0 +1,43 @@
+services:
+
+  gateway:
+    build: .
+    container_name: minishop-gateway
+    ports:
+      - "5000:5000"
+    depends_on:
+      - product
+      - cart
+      - payment
+
+  login:
+    build: ./login-service
+    container_name: minishop-login
+    env_file:
+      - ./login-service/.env
+    ports:
+      - "5001:5001"
+
+  product:
+    build: ./product-service
+    container_name: minishop-product
+    env_file:
+      - ./product-service/.env
+    ports:
+      - "5002:5002"
+
+  cart:
+    build: ./cart-service
+    container_name: minishop-cart
+    env_file:
+      - ./cart-service/.env
+    ports:
+      - "5003:5003"
+
+  payment:
+    build: ./payment-service
+    container_name: minishop-payment
+    env_file:
+      - ./payment-service/.env
+    ports:
+      - "5004:5004"

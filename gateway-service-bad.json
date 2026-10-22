@@ -1,0 +1,7 @@
+{
+  "spec": {
+    "selector": {
+      "app": "wrong-gateway"
+    }
+  }
+}

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MiniShop Cart</title>
+
+    <style>
+        body{
+            margin:0;
+            font-family:Arial;
+            background:#f5f6f8;
+        }
+
+        header{
+            background:#111827;
+            color:white;
+            padding:20px 40px;
+            display:flex;
+            justify-content:space-between;
+        }
+
+        a{
+            color:white;
+            text-decoration:none;
+        }
+
+        .container{
+            width:900px;
+            margin:40px auto;
+        }
+
+        .item{
+            background:white;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:20px;
+            margin-bottom:18px;
+            border-radius:10px;
+        }
+
+        .price{
+            color:#16a34a;
+            font-weight:bold;
+        }
+
+        button{
+            background:#dc2626;
+            color:white;
+            border:none;
+            padding:10px 16px;
+            border-radius:6px;
+            cursor:pointer;
+        }
+
+        .total{
+            text-align:right;
+            font-size:26px;
+            margin-top:25px;
+            font-weight:bold;
+        }
+
+        .checkout{
+            width:100%;
+            background:#2563eb;
+            margin-top:20px;
+            padding:14px;
+            font-size:17px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+
+<h2>🛒 Cart Service</h2>
+
+<a href="http://127.0.0.1:5000">
+← Continue Shopping
+</a>
+
+</header>
+
+<div class="container">
+
+{% for item in items %}
+
+<div class="item">
+
+<div>
+
+<h3>{{ item[1] }}</h3>
+
+<p>Qty : {{ item[3] }}</p>
+
+<div class="price">
+₹ {{ item[2] }}
+</div>
+
+</div>
+
+<button onclick="removeItem({{ item[0] }})">
+Delete
+</button>
+
+</div>
+
+{% endfor %}
+
+<div class="total">
+Total : ₹ {{ total }}
+</div>
+
+<button class="checkout"
+onclick="location.href='/payment'">
+Proceed to Payment
+</button>
+
+</div>
+
+<script>
+async function removeItem(id){
+
+    await fetch(
+        "/cart/delete/"+id,
+        {method:"POST"}
+    );
+
+    location.reload();
+}
+</script>
+
+</body>
+</html>

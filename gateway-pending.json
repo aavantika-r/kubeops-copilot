@@ -1,0 +1,11 @@
+{
+  "spec": {
+    "template": {
+      "spec": {
+        "nodeSelector": {
+          "kubeops-test-node": "does-not-exist"
+        }
+      }
+    }
+  }
+}

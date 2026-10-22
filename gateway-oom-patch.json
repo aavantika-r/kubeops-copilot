@@ -1,0 +1,23 @@
+{
+  "spec": {
+    "template": {
+      "spec": {
+        "containers": [
+          {
+            "name": "gateway",
+            "resources": {
+              "limits": {
+                "memory": "16Mi"
+              }
+            },
+            "command": [
+              "python",
+              "-c",
+              "x='A'*200000000"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

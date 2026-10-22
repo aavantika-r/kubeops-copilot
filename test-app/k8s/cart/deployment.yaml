@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart
+  namespace: minishop
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: cart
+
+  template:
+    metadata:
+      labels:
+        app: cart
+
+    spec:
+      containers:
+        - name: cart
+          image: test-app-cart:v5
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 5003
+
+          envFrom:
+            - secretRef:
+                name: minishop-db

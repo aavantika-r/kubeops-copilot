@@ -1,0 +1,14 @@
+{
+  "spec": {
+    "template": {
+      "spec": {
+        "containers": [
+          {
+            "name": "login",
+            "command": ["sh", "-c", "exit 1"]
+          }
+        ]
+      }
+    }
+  }
+}

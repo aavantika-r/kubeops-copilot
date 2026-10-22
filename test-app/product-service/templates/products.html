@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MiniShop - Products</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial,sans-serif;
+        }
+
+        body{
+            background:#f4f7fb;
+        }
+
+        header{
+            background:#2563eb;
+            color:white;
+            padding:18px 40px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        }
+
+        .logo{
+            font-size:28px;
+            font-weight:bold;
+        }
+
+        .user{
+            font-size:15px;
+        }
+
+        h2{
+            margin:30px 40px 20px;
+            color:#1f2937;
+        }
+
+        .grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+            gap:22px;
+            padding:0 40px 40px;
+        }
+
+        .card{
+            background:white;
+            border-radius:14px;
+            overflow:hidden;
+            box-shadow:0 8px 20px rgba(0,0,0,.08);
+            transition:.2s;
+        }
+
+        .card:hover{
+            transform:translateY(-4px);
+        }
+
+        .image{
+    height:180px;
+    background:#f3f4f6;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.image img{
+    width:140px;
+    height:140px;
+    object-fit:contain;
+}
+
+        .content{
+            padding:18px;
+        }
+
+        .name{
+            font-size:18px;
+            font-weight:bold;
+            color:#111827;
+        }
+
+        .price{
+            margin-top:8px;
+            font-size:20px;
+            color:#16a34a;
+            font-weight:bold;
+        }
+
+        button{
+            width:100%;
+            margin-top:15px;
+            padding:11px;
+            border:none;
+            border-radius:8px;
+            background:#2563eb;
+            color:white;
+            font-weight:bold;
+            cursor:pointer;
+        }
+
+        button:hover{
+            background:#1d4ed8;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">🛒 MiniShop</div>
+    <div class="user">Products</div>
+</header>
+
+<h2>Featured Products</h2>
+
+<div class="grid">
+
+{% for p in products %}
+
+<div class="card">
+
+    <div class="image">
+    <img
+        src="{{ url_for('static', filename='images/' + p[1]|lower + '.png') }}"
+        alt="{{ p[1] }}"
+    >
+</div>
+
+    <div class="content">
+
+        <div class="name">{{ p[1] }}</div>
+
+        <div class="price">₹ {{ p[2] }}</div>
+
+        <a href="/add/{{ p[0] }}">
+    <button>Add to Cart</button>
+</a>
+
+    </div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</body>
+</html>

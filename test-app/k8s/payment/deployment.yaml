@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment
+  namespace: minishop
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: payment
+
+  template:
+    metadata:
+      labels:
+        app: payment
+
+    spec:
+      containers:
+        - name: payment
+          image: test-app-payment:v2
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 5004
+
+          envFrom:
+            - secretRef:
+                name: minishop-db

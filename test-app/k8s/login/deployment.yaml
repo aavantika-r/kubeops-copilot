@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: login
+  namespace: minishop
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: login
+
+  template:
+    metadata:
+      labels:
+        app: login
+
+    spec:
+      containers:
+        - name: login
+          image: test-app-login:v5
+          imagePullPolicy: Never
+
+          ports:
+            - containerPort: 5001
+
+          envFrom:
+            - secretRef:
+                name: minishop-db

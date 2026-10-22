@@ -1,158 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>My Cart - MiniShop</title>
+    <title>MiniShop Cart</title>
 
     <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f5f6f8;
+        body{
+            margin:0;
+            font-family:Arial;
+            background:#f5f6f8;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        header{
+            background:#111827;
+            color:white;
+            padding:20px 40px;
+            display:flex;
+            justify-content:space-between;
         }
 
-        h1 {
-            text-align: center;
+        a{
+            color:white;
+            text-decoration:none;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 30px;
+        .container{
+            width:900px;
+            margin:40px auto;
         }
 
-        th, td {
-            padding: 15px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
+        .item{
+            background:white;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:20px;
+            margin-bottom:18px;
+            border-radius:10px;
         }
 
-        th {
-            background: #111827;
-            color: white;
+        .price{
+            color:#16a34a;
+            font-weight:bold;
         }
 
-        .total {
-            text-align: right;
-            font-size: 22px;
-            font-weight: bold;
-            margin-top: 25px;
+        button{
+            background:#dc2626;
+            color:white;
+            border:none;
+            padding:10px 16px;
+            border-radius:6px;
+            cursor:pointer;
         }
 
-        .delete-btn {
-            background: #dc2626;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            cursor: pointer;
+        .total{
+            text-align:right;
+            font-size:26px;
+            margin-top:25px;
+            font-weight:bold;
         }
 
-        .delete-btn:hover {
-            background: #b91c1c;
-        }
-
-        .back {
-            display: inline-block;
-            margin-top: 25px;
-            padding: 10px 18px;
-            background: #2563eb;
-            color: white;
-            text-decoration: none;
-            border-radius: 7px;
+        .checkout{
+            width:100%;
+            background:#2563eb;
+            margin-top:20px;
+            padding:14px;
+            font-size:17px;
         }
     </style>
 </head>
 
 <body>
 
+<header>
+
+<h2>🛒 Cart Service</h2>
+
+<a href="http://127.0.0.1:5000">
+← Continue Shopping
+</a>
+
+</header>
+
 <div class="container">
 
-    <h1>🛒 My Cart</h1>
+{% for item in items %}
 
-    {% if cart_items %}
+<div class="item">
 
-    <table>
+<div>
 
-        <tr>
-            <th>Product</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Subtotal</th>
-            <th>Action</th>
-        </tr>
+<h3>{{ item[1] }}</h3>
 
-        {% for item in cart_items %}
+<p>Qty : {{ item[3] }}</p>
 
-        <tr>
-            <td>{{ item[1] }}</td>
+<div class="price">
+₹ {{ item[2] }}
+</div>
 
-            <td>
-                ₹{{ "%.2f"|format(item[2]) }}
-            </td>
+</div>
 
-            <td>
-                {{ item[3] }}
-            </td>
+<button onclick="removeItem({{ item[0] }})">
+Delete
+</button>
 
-            <td>
-                ₹{{ "%.2f"|format(item[4]) }}
-            </td>
+</div>
 
-            <td>
-                <button
-                    class="delete-btn"
-                    onclick="deleteItem({{ item[0] }})">
-                    Delete
-                </button>
-            </td>
-        </tr>
+{% endfor %}
 
-        {% endfor %}
+<div class="total">
+Total : ₹ {{ total }}
+</div>
 
-    </table>
-
-    <div class="total">
-        Total: ₹{{ "%.2f"|format(total) }}
-    </div>
-
-    {% else %}
-
-    <h3 style="text-align:center;">
-        Your cart is empty.
-    </h3>
-
-    {% endif %}
-
-    <a href="/" class="back">
-        ← Continue Shopping
-    </a>
+<button class="checkout"
+onclick="location.href='/payment'">
+Proceed to Payment
+</button>
 
 </div>
 
 <script>
-async function deleteItem(itemId) {
+async function removeItem(id){
 
-    const response = await fetch(`/cart/delete/${itemId}`, {
-        method: "POST"
-    });
+    await fetch(
+        "/cart/delete/"+id,
+        {method:"POST"}
+    );
 
-    if (response.ok) {
-        location.reload();
-    } else {
-        alert("Failed to delete item");
-    }
+    location.reload();
 }
 </script>
 
